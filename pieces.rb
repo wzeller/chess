@@ -169,7 +169,7 @@ class Pawn < Piece
     
     #checks for captures
     if self.pos.is_diag?(end_pos)
-      return false unless end_pos.rows - self.pos.ros == delta && !@board(end_pos).nil?
+      return false unless end_pos.rows - self.pos.ros == delta && !@board[end_pos].nil?
     end
     
     #set flag for later moves

@@ -122,7 +122,6 @@ board[pos6].move(Pos.new(pos7))
 board[pos7].move(Pos.new(pos8))
 board[pos8].move(Pos.new(pos9))
 board[pos10].move(pos11)
-p pos8 - pos9
 
 print board.stage
 
