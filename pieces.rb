@@ -60,7 +60,6 @@ class Piece
 
 end
 
-
 class Bishop < Piece
   def initialize(color, pos, board)
     super(:Bishop, color, pos, board)
@@ -147,58 +146,34 @@ class Pawn < Piece
 
   def initialize(color, pos, board)
     super(:Pawn, color, pos, board)
+    @moved = false
   end
 
-  def move(end_pos)
-    if self.color == :black
-      raise InvalidMoveError unless @@moves.include?(end_pos-self.pos)
-      #if first move
-      if self.pos[0] == 1 && end_pos - self.pos == @@moves.last
-        #only valid if sqaure ahead is empty or two ahead
-        return InvalidMoveError if @board[self.pos + @@moves.first] != nil
-        return InvalidMoveError if @board[self.pos + @@moves.last] != nil
-
-        move_helper(end_pos)
-      end
-      #if capture
-      if @@moves[1..2].include? (end_pos - self.pos)
-        return InvalidMoveError if @board[end_pos].nil? || own_piece?(@board[end_pos])
-        move_helper(end_pos)
-        return :captured_piece
-      end
-
-      if @@moves.first == (end_pos - self.pos)
-        if @board[end_pos].nil?
-          move_helper(end_pos)
-        end
-      end
+  def can_move?(end_pos)
+    delta = 1 if self.color == :black
+    delta = -1 if self.color == :white
+    
+    #standard checks for illegal move
+    return false unless on_board?(end_pos)
+    return false if own_piece?(@board[end_pos])
+    all_moves = self.pos.to(end_pos)
+    return false if all_moves.empty?
+    return false unless not_blocked?(all_moves)
+    
+    #checks for straight moves
+    if @moved == false && self.pos.vertical_to?(end_pos)
+      return false unless (end_pos.rows - self.pos.rows) == delta || (end_pos.rows - self.pos.rows) == delta*2
+    elsif @moved == true && self.pos.vertical_to?(end_pos)
+      return false unless (end_pos.rows - self.pos.rows) == delta
     end
-
-    if self.color == :white
-      raise InvalidMoveError unless @@moves.include?(self.pos-end_pos)
-      #if first move
-      if self.pos[0] == 6 && self.pos - end_pos == @@moves.last
-        #only valid if sqaure ahead is empty or two ahead
-        return InvalidMoveError if @board[self.pos - @@moves.first] != nil
-        return InvalidMoveError if @board[self.pos - @@moves.last] != nil
-
-        move_helper(end_pos)
-      end
-      #if capture
-      if @@moves[1..2].include? (self.pos - end_pos)
-        return InvalidMoveError if @board[end_pos].nil? || own_piece?(@board[end_pos])
-        move_helper(end_pos)
-        return :captured_piece
-      end
-
-      if @@moves.first == (self.pos - end_pos)
-        if @board[end_pos].nil?
-          move_helper(end_pos)
-        end
-      end
+    
+    #checks for captures
+    if self.pos.is_diag?(end_pos)
+      return false unless end_pos.rows - self.pos.ros == delta && !@board(end_pos).nil?
     end
-
+    
+    #set flag for later moves
+    @moved = true 
+    return true 
   end
-
-
 end
