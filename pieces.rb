@@ -1,3 +1,6 @@
+#cannot move into check -- add to test for validity in each piece
+
+
 require 'colorize'
 
 class InvalidMoveError < RuntimeError

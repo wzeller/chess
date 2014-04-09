@@ -85,10 +85,14 @@ class Board
       end
       frame <<  "\n"
     end
-
     return frame.join
-
   end
+
+#first test after move is made -- dup board, see if king square is in check, ASSUMING 
+#validity -- if it is, return InvalidMoveError, else, throw out duped board, run move method
+
+#Other alternative is dup board, generate all possible moves for own color, and if 
+#none of those moves result in king NOT being in check, return checkmate
 
   def is_square_in_check?(square, opponent_color)
     square = Pos.new(square)
