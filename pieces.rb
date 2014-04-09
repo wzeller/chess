@@ -18,6 +18,11 @@ class Piece
     Pawn:   "\u265F",
   }
 
+  @@opponents_color ={
+    white:  :black,
+    black:  :white
+  }
+
   attr_accessor :type, :color, :symbol, :pos
 
   #type :pieces,  color :white/:black, pos = Pos object, board = Board object
@@ -27,6 +32,7 @@ class Piece
     @pos = Pos.new(pos)
     @board = board
     @symbol = @@visual[type]
+
   end
 
   def on_board?(pos)
@@ -49,17 +55,38 @@ class Piece
     @board[end_pos] = self
     @board[self.pos] = nil
     self.pos = end_pos
+    self.moved = true if self.type == :Pawn
   end
 
-  def move(end_pos)
-    end_pos = Pos.new(end_pos)
-    raise InvalidMoveError unless can_move?(end_pos) 
+  def move(end_pos, dup_move = false)
+
+    if !can_move?(end_pos) && dup_move == false
+      raise InvalidMoveError
+    elsif !can_move?(end_pos) && dup_move == true
+      return nil
+    end
+
     if @board[end_pos] != nil
       move_helper(end_pos)
       return :captured_piece
     else
       move_helper(end_pos)
     end
+  end
+
+  def piece_valid_moves
+    valid_moves = []
+    (0...8).each do |row|
+      (0...8).each do |col|
+        p = Pos.new([row,col])
+         valid_moves << p if can_move?(p)
+       end
+     end
+     valid_moves
+  end
+
+  def can_move?(end_pos)
+    raise NotYetImplemented
   end
 end
 
@@ -75,10 +102,9 @@ class Bishop < Piece
     return false if own_piece?(@board[end_pos])
     all_moves = self.pos.to(end_pos)
     return false if all_moves.empty?
-    return false unless not_blocked(all_moves)
+    return false unless not_blocked?(all_moves)
     return true
   end
-  
 end
 
 class Rook < Piece
@@ -131,7 +157,7 @@ class Knight < Piece
   def initialize(color, pos, board)
     super(:Knight, color, pos, board)
   end
-  
+
   def can_move?(end_pos)
     end_pos = Pos.new(end_pos)
     return false unless on_board?(end_pos)
@@ -147,11 +173,26 @@ class King < Piece
   def initialize(color, pos, board)
     super(:King, color, pos, board)
   end
-
+  #replace with real king
+  def can_move?(end_pos)
+    return false if end_pos == self.pos
+    return false unless on_board?(end_pos)
+    return false unless self.pos.vertical_to?(end_pos) || self.pos.horizontal_to?(end_pos)
+    return false if own_piece?(@board[end_pos])
+    all_moves = self.pos.to(end_pos)
+    return false if all_moves.empty?
+    return false unless not_blocked?(all_moves)
+    return false unless (self.pos - end_pos) != nil && (self.pos - end_pos).two_norm_square == 2
+    return false if is_square_in_check?(end_pos, @@opponent_color[self.color])
+    return true
+  end
 end
 
 class Pawn < Piece
   #normal moves
+
+  attr_accessor :moved
+
   @@moves = [Pos.new([1 , 0]),
             Pos.new([1 , 1]),
             Pos.new([1 , -1]),
@@ -165,29 +206,28 @@ class Pawn < Piece
   def can_move?(end_pos)
     delta = 1 if self.color == :black
     delta = -1 if self.color == :white
-    
+
     #standard checks for illegal move
     return false unless on_board?(end_pos)
     return false if own_piece?(@board[end_pos])
     all_moves = self.pos.to(end_pos)
     return false if all_moves.empty?
     return false unless not_blocked?(all_moves)
-    
+
     #checks for straight moves
     if @moved == false && self.pos.vertical_to?(end_pos)
-      return false unless (end_pos.rows - self.pos.rows) == delta || (end_pos.rows - self.pos.rows) == delta*2
+      return false unless (end_pos.rows - self.pos.rows) == delta || (end_pos.rows - self.pos.rows) == (delta * 2)
     elsif @moved == true && self.pos.vertical_to?(end_pos)
       return false unless (end_pos.rows - self.pos.rows) == delta
     end
-    
+
     #checks for captures
     if self.pos.is_diag?(end_pos)
-      return false unless end_pos.rows - self.pos.ros == delta && !@board[end_pos].nil?
+      return false unless end_pos.rows - self.pos.rows == delta && !@board[end_pos].nil?
     end
-    
+
     #set flag for later moves
-    @moved = true 
-    return true 
+    return true
   end
 
 end

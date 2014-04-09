@@ -20,6 +20,10 @@ class Pos
     @columns
   end
 
+  def two_norm_square
+    return @rows*@rows + @columns*@columns
+  end
+
   def [](index)
     return @rows if index == 0
     return @columns if index == 1
