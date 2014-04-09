@@ -1,9 +1,3 @@
-#Piece class
-# /               \                 \
-#Sliding piece   stepping piece   pawn
-# |                       |
-#Biship,Rook,Queen    knight,king
-
 require 'colorize'
 
 class InvalidMoveError < RuntimeError
@@ -32,13 +26,13 @@ class Piece
   end
 
   def on_board?(pos)
-    (0...@board.size).cover?(pos.rows) && (0...@board.size).cover?(pos.columns)
+    (0...@board.size).cover?(pos[0]) && (0...@board.size).cover?(pos[1])
   end
 
   def not_blocked?(possible_moves)
     #remove target move before testing for blocks
     possible_moves.pop
-    possible_moves.each {|move| return false unless @board[move].nil?}
+    possible_moves.each {|move| move = Pos.new(move); return false unless @board[move].nil?}
     return true
   end
 
@@ -48,11 +42,20 @@ class Piece
   end
 
   def move_helper(end_pos)
-
     @board[end_pos] = self
-    #p @board.board.object_id
     @board[self.pos] = nil
     self.pos = end_pos
+  end
+
+  def move(end_pos)
+    end_pos = Pos.new(end_pos)
+    raise InvalidMoveError unless can_move?(end_pos) 
+    if @board[end_pos] != nil
+      move_helper(end_pos)
+      return :captured_piece
+    else
+      move_helper(end_pos)
+    end
   end
 
 end
@@ -64,46 +67,45 @@ class Bishop < Piece
   end
 
   def can_move?(end_pos)
-    return false if !on_board?(end_pos)
-    return false if !self.pos.is_diag?(end_pos)
+    return false unless on_board?(end_pos)
+    return false unless self.pos.is_diag?(end_pos)
+    return false if own_piece?(@board[end_pos])
     all_moves = self.pos.to(end_pos)
     return false if all_moves.empty?
-    return false if !not_blocked(all_moves)
+    return false unless not_blocked(all_moves)
     return true
   end
-
-  def move(end_pos)
-    raise InvalidMoveError if !self.pos.is_diag?(end_pos)
-    all_moves = self.pos.to(end_pos)
-    raise InvalidMoveError if all_moves.empty?
-    if not_blocked?(all_moves) && on_board?(end_pos)
-      if @board[end_pos] != nil && (not own_piece?(@board[end_pos]))
-        move_helper(end_pos)
-        return :captured_piece
-      else
-        move_helper(end_pos)
-      end
-    end
-    raise InvalidMoveError
-  end
-
-
+  
 end
 
 class Rook < Piece
   def initialize(color, pos, board)
     super(:Rook, color, pos, board)
   end
-  def move(end_pos)
+  def can_move?(end_pos)
+    return false unless on_board?(end_pos)
+    return false unless self.pos.vertical_to?(end_pos) || self.pos.horizontal_to?(end_pos)
+    return false if own_piece?(@board[end_pos])
     all_moves = self.pos.to(end_pos)
-    raise InvalidMoveError if all_moves.empty?
-
+    return false if all_moves.empty?
+    return false unless not_blocked?(all_moves)
+    return true
   end
 end
 
 class Queen < Piece
   def initialize(color, pos, board)
     super(:Queen, color, pos, board)
+  end
+
+  def can_move?(end_pos)
+    return false unless on_board?(end_pos)
+    return false unless self.pos.is_diag?(end_pos) || self.pos.vertical_to?(end_pos) || self.pos.horizontal_to?(end_pos)
+    return false if own_piece?(@board[end_pos])
+    all_moves = self.pos.to(end_pos)
+    return false if all_moves.empty?
+    return false unless not_blocked?(all_moves)
+    return true
   end
 end
 
@@ -120,21 +122,13 @@ class Knight < Piece
   def initialize(color, pos, board)
     super(:Knight, color, pos, board)
   end
-  #b = Knight.new(:black,Pos.new([2,2]),board)
-
-  def move(end_pos)
-    if @@knight_delta.include?(end_pos - self.pos)
-      if own_piece?(@board[end_pos])
-        raise InvalidMoveError
-      elsif @board[end_pos] != nil
-        move_helper(end_pos)
-        return :captured_piece
-      else
-        move_helper(end_pos)
-      end
-    else
-      raise InvalidMoveError
-    end
+  
+  def can_move?(end_pos)
+    end_pos = Pos.new(end_pos)
+    return false unless on_board?(end_pos)
+    return false unless @@knight_delta.include?(end_pos - self.pos)
+    return false if own_piece?(@board[end_pos])
+    return true
   end
 end
 

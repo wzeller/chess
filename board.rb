@@ -77,10 +77,10 @@ class Board
       (0...8).each do |col|
         square = @board_color[row][col]
         if @board[row][col].nil?
-          frame << "  ".colorize({background: square})
+          frame << "   ".colorize({background: square})
         else
           piece = @board[row][col]
-          frame << (piece.symbol+" ").colorize({color: piece.color, background: square, bold: true})
+          frame << (" " + piece.symbol + " ").colorize({color: piece.color, background: square, bold: true})
         end
       end
       frame <<  "\n"
@@ -93,7 +93,7 @@ class Board
   def debug_print
     @board.each do |row|
       row.each do |element|
-        print element.symbol+"  " if element != nil
+        print " " + element.symbol if element != nil
         print "   " if  element == nil
       end
       print "\n"
@@ -103,13 +103,25 @@ class Board
 end
 
 board = Board.new
-pos1 = Pos.new [1,1]
-pos2 = Pos.new [3,1]
-pos3 = Pos.new [6,0]
-pos4 = Pos.new [4,0]
-board[pos1].move(pos2)
+
+pos1 = [7,1]
+pos2 = [5,2]
+pos3 = [6,3]
+pos4 = [4,3]
+pos5 = [7,3]
+pos6 = [5,3]
+pos7 = [3,5]
+pos8 = [3,0]
+pos9 = [1,0]
+pos10 = [0,0]
+pos11 = [1,0]
+board[Pos.new(pos1)].move(Pos.new(pos2))
+board[Pos.new(pos3)].move(Pos.new(pos4))
+board[Pos.new(pos5)].move(Pos.new(pos6))
+board[pos6].move(Pos.new(pos7))
+board[pos7].move(Pos.new(pos8))
+board[pos8].move(Pos.new(pos9))
+board[pos10].move(pos11)
+
 print board.stage
-board[pos3].move(pos4)
-print board.stage
-board[pos2].move(pos4)
-print board.stage
+

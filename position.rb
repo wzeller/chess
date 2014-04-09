@@ -1,5 +1,7 @@
 require 'debugger'
+
 class Pos
+
   attr_accessor :rows, :columns
 
   def first=(val)
@@ -64,11 +66,11 @@ class Pos
     elsif vertical_to?(end_pos)
       if @rows > end_pos.rows
         (@rows - 1).downto(end_pos.rows) do |new_row|
-          range << Pos.new([@rows, new_row])
+          range << Pos.new([new_row, @columns])
         end
       else
         (@rows + 1).upto(end_pos.rows) do |new_row|
-          range << Pos.new([@rows, new_row])
+          range << Pos.new([new_row, @columns])
         end
       end
     elsif left_diag_to?(end_pos)
