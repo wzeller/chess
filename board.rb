@@ -90,16 +90,21 @@ class Board
 
   end
 
-  def debug_print
-    @board.each do |row|
-      row.each do |element|
-        print " " + element.symbol if element != nil
-        print "   " if  element == nil
-      end
-      print "\n"
-    end
-  end
+  def is_square_in_check?(square, opponent_color)
+    square = Pos.new(square)
+    (0...8).each do |row|
+      (0...8).each do |col|
+        next if @board[row][col].nil?
+        next unless @board[row][col].color == opponent_color
+        
+        #skip king for now
+        next if @board[row][col].type == :King
 
+        return true if @board[row][col].can_move?(square)
+      end
+    end
+    return false
+  end
 end
 
 board = Board.new
@@ -122,6 +127,8 @@ board[pos6].move(Pos.new(pos7))
 board[pos7].move(Pos.new(pos8))
 board[pos8].move(Pos.new(pos9))
 board[pos10].move(pos11)
+p board.is_square_in_check?([5,2], :white)
+p board.is_square_in_check?([6,0], :black)
 
 print board.stage
 

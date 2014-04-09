@@ -15,7 +15,8 @@ class Piece
     Pawn:   "\u265F",
   }
 
-  attr_accessor :color, :symbol, :pos
+  attr_accessor :type, :color, :symbol, :pos
+
   #type :pieces,  color :white/:black, pos = Pos object, board = Board object
   def initialize(type, color, pos, board)
     @type = type
@@ -57,10 +58,10 @@ class Piece
       move_helper(end_pos)
     end
   end
-
 end
 
 class Bishop < Piece
+
   def initialize(color, pos, board)
     super(:Bishop, color, pos, board)
   end
@@ -78,9 +79,11 @@ class Bishop < Piece
 end
 
 class Rook < Piece
+
   def initialize(color, pos, board)
     super(:Rook, color, pos, board)
   end
+
   def can_move?(end_pos)
     return false unless on_board?(end_pos)
     return false unless self.pos.vertical_to?(end_pos) || self.pos.horizontal_to?(end_pos)
@@ -90,9 +93,11 @@ class Rook < Piece
     return false unless not_blocked?(all_moves)
     return true
   end
+
 end
 
 class Queen < Piece
+
   def initialize(color, pos, board)
     super(:Queen, color, pos, board)
   end
@@ -106,9 +111,11 @@ class Queen < Piece
     return false unless not_blocked?(all_moves)
     return true
   end
+
 end
 
 class Knight < Piece
+
   @@knight_delta = [Pos.new([2 , 1]),
                     Pos.new([2 ,-1]),
                     Pos.new([1 , 2]),
@@ -129,12 +136,15 @@ class Knight < Piece
     return false if own_piece?(@board[end_pos])
     return true
   end
+
 end
 
 class King < Piece
+
   def initialize(color, pos, board)
     super(:King, color, pos, board)
   end
+
 end
 
 class Pawn < Piece
@@ -176,4 +186,5 @@ class Pawn < Piece
     @moved = true 
     return true 
   end
+
 end
