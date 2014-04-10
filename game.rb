@@ -12,60 +12,40 @@ class Game
     @board = Board.new
     @opponent_turn = {:white => :black, :black => :white}
     @framebuffer = [@board.stage, "Make a move: (start move, end move) e.g. 0,1,1,1:   ", "", "\n Turn \n"]
+    @own_king_in_check == false
   end
 
   def play
-    @own_king_in_check = false
-    #erase dup board after finished
     turn = :white
     begin
 
     while true
 
       render
+      p turn 
+      @own_king_in_check = true if @board.is_board_in_check?(turn, @opponent_turn[turn])
+      p @board.is_board_in_check?(turn, @opponent_turn[turn])
 
-
-      #test if check
       dup_board = @board.dup
-      @own_king_in_check = dup_board.is_board_in_check?(turn, @opponent_turn[turn])
-
       all_pos_self_moves = []
-      #if so, test if checkmate
 
       #first get all self moves
       dup_board.get_pieces(turn).each {|piece| all_pos_self_moves += piece.piece_valid_moves}
-
-      #debugger
-      # p dup_board.get_pieces(turn)
-      #next test if, after each move, king in check, you lose
+    
+      #next test if, after each move, king in check and you're checkmated
       all_legal_moves = []
       all_pos_self_moves.each do |move|
-        #make position?
         dup_move = true
         new_dup = dup_board.dup
         new_dup.get_pieces(turn).each do |piece|
           if piece.can_move?(move) == true
             piece.move(move, dup_move)
-            # p piece.pos.to_a
-            # p turn
-            # p @opponent_turn[turn]
-            # print new_dup.stage
-            # p new_dup.object_id.to_s + " OUTSIDE OF MOVE"
-
-            if not new_dup.is_board_in_check?(turn, @opponent_turn[turn])
-              print new_dup.stage
-              all_legal_moves << move
-            end
+          unless new_dup.is_board_in_check?(turn, @opponent_turn[turn])
+            all_legal_moves << move
           end
         end
       end
-
-
-      # @framebuffer[2] = turn.to_s.upcase.colorize({color: :yellow})+"'s Turn: " + "\n"
-      display_moves = []
-      all_pos_self_moves.each {|move|  display_moves << move.to_a}
-      puts display_moves.inspect + "\n"
-
+    end
 
       #checkmate if...
       if all_legal_moves.empty?

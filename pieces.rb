@@ -226,6 +226,7 @@ class Pawn < Piece
     all_moves = self.pos.to(end_pos)
     return false if all_moves.empty?
     return false unless not_blocked?(all_moves)
+    return false if self.pos.horizontal_to?(end_pos)
 
     #checks for straight moves
     if @moved == false && self.pos.vertical_to?(end_pos)

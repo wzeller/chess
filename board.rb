@@ -84,27 +84,21 @@ class Board
 
   def dup
     dup_board = Board.new(false)
-    # p "Inside dup -- before making piece: #{dup_board.object_id}"
-    # (@black_pieces + @white_pieces).each do
-    #   |piece| dup_board[piece.pos] = Object::const_get(piece.type.to_s).new(piece.color, Pos.new([piece.pos[0],piece.pos[1]]),dup_board)
-    # end
+    (@black_pieces + @white_pieces).each do
+      |piece| dup_board[piece.pos] = Object::const_get(piece.type.to_s).new(piece.color, Pos.new([piece.pos[0],piece.pos[1]]),dup_board)
+    end
     (0...8).each do |row|
       (0...8).each do |col|
          unless @board[row][col] == nil
-           # old_piece_type = @board[row][col].type
-           # old_piece_color = @board[row][col].color
-           # new_piece = Object::const_get(old_piece_type.to_s).new(old_piece_color, Pos.new([row,col]),dup_board)
            old_piece = @board[row][col]
            new_piece = old_piece.class.new(old_piece.color, Pos.new([row,col]), dup_board)
-           # p "Piece board: #{new_piece.board.object_id}"
-           # p "Inside dup -- after making piece: #{dup_board.object_id}"
            dup_board.board[row][col] = new_piece
            dup_board.black_pieces << new_piece if new_piece.color == :black
            dup_board.white_pieces << new_piece if new_piece.color == :white
          end
       end
     end
-    dup_board
+   dup_board
   end
 
   def stage
@@ -134,10 +128,15 @@ class Board
 #none of those moves result in king NOT being in check, return checkmate
 
   def is_board_in_check?(self_turn, opponent_turn)
+    puts "self_turn: #{self_turn}"
+    puts "opponent_turn: #{opponent_turn}"
     king_pos =  self.board.flatten.select {|piece| !piece.nil? && piece.type == :King && piece.color == self_turn}[0].pos
+    p "king: #{king_pos}"
     all_pos_opponent_moves = []
     #test if check
-    self.get_pieces(opponent_turn).each {|piece| all_pos_opponent_moves += piece.piece_valid_moves}
+    self.get_pieces(opponent_turn).each {|piece| p piece.type; all_pos_opponent_moves += piece.piece_valid_moves; p piece.pos.to_a; p piece.color; piece.piece_valid_moves}
+    
+    all_pos_opponent_moves.each{|move| print move.to_a}
 
     if all_pos_opponent_moves.include?(king_pos)
       return true
@@ -146,21 +145,21 @@ class Board
     return false
   end
 
-  def is_square_in_check?(square, opponent_color)
-    square = Pos.new(square)
-    (0...8).each do |row|
-      (0...8).each do |col|
-        next if @board[row][col].nil?
-        next unless @board[row][col].color == opponent_color
+  # def is_square_in_check?(square, opponent_color)
+  #   square = Pos.new(square)
+  #   (0...8).each do |row|
+  #     (0...8).each do |col|
+  #       next if @board[row][col].nil?
+  #       next unless @board[row][col].color == opponent_color
 
-        #skip king for now
-        next if @board[row][col].type == :King
+  #       #skip king for now
+  #       next if @board[row][col].type == :King
 
-        return true if @board[row][col].can_move?(square)
-      end
-    end
-    return false
-  end
+  #       return true if @board[row][col].can_move?(square)
+  #     end
+  #   end
+  #   return false
+  # end
 
   def is_checkmate?(turn, opponent_turn)
     all_pos_self_moves = []
