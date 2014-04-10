@@ -11,7 +11,7 @@ class Game
   def initialize
     @board = Board.new
     @opponent_turn = {:white => :black, :black => :white}
-    @framebuffer = [@board.stage, "Make a move: (start move, end move) e.g. 0,1,1,1:   ", "", "turn"]
+    @framebuffer = [@board.stage, "Make a move: (start move, end move) e.g. 0,1,1,1:   ", "", "\n Turn \n"]
   end
 
   def play
@@ -46,16 +46,25 @@ class Game
         new_dup.get_pieces(turn).each do |piece|
           if piece.can_move?(move) == true
             piece.move(move, dup_move)
-            all_legal_moves << move unless new_dup.is_board_in_check?(turn, @opponent_turn[turn])
+            # p piece.pos.to_a
+            # p turn
+            # p @opponent_turn[turn]
+            # print new_dup.stage
+            # p new_dup.object_id.to_s + " OUTSIDE OF MOVE"
+
+            if not new_dup.is_board_in_check?(turn, @opponent_turn[turn])
+              all_legal_moves << move
+            end
           end
-          new_dup = new_dup.dup
         end
       end
 
-      @framebuffer[2] = turn.to_s.upcase.colorize({color: turn})+"'s Turn: " + "\n"
+
+      # @framebuffer[2] = turn.to_s.upcase.colorize({color: :yellow})+"'s Turn: " + "\n"
       display_moves = []
-      all_legal_moves.each {|move|  display_moves << move.to_a}
-      @framebuffer[3] =  display_moves.inspect + "\n"
+      all_pos_self_moves.each {|move|  display_moves << move.to_a}
+      puts display_moves.inspect + "\n"
+
 
       #checkmate if...
       if all_legal_moves.empty?
@@ -64,7 +73,7 @@ class Game
       end
 
       if @own_king_in_check == true
-        @framebuffer << "you're in check\n\n"
+       puts "you're in check\n\n"
       end
 
       @framebuffer[1] =  "Make a move: (start move, end move) e.g. 0,1,1,1:    \n" #0,1,1,1

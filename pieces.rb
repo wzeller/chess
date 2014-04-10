@@ -23,7 +23,7 @@ class Piece
     black:  :white
   }
 
-  attr_accessor :type, :color, :symbol, :pos
+  attr_accessor :type, :color, :symbol, :pos, :board
 
   #type :pieces,  color :white/:black, pos = Pos object, board = Board object
   def initialize(type, color, pos, board)
@@ -52,13 +52,23 @@ class Piece
   end
 
   def move_helper(end_pos)
+    # p "INSIDE MOVE_HELPER"
+    # p end_pos.to_a
+    # #print @board.stage
+    # p "self.board id #{self.board.object_id}"
     @board[end_pos] = self
+    #print @board.stage
     @board[self.pos] = nil
-    self.pos = end_pos
+    #print @board.stage
+    self.pos = Pos.new([end_pos[0],end_pos[1]])
+    # print @board.stage
+    # p "Inside: #{@board.object_id}"
     self.moved = true if self.type == :Pawn
   end
 
   def move(end_pos, dup_move = false)
+    # p end_pos
+    # p dup_move
 
     if !can_move?(end_pos) && dup_move == false
       raise InvalidMoveError
@@ -67,9 +77,11 @@ class Piece
     end
 
     if @board[end_pos] != nil
+      # p "making move"
       move_helper(end_pos)
       return :captured_piece
     else
+      # p "making move"
       move_helper(end_pos)
     end
   end
@@ -136,6 +148,7 @@ class Queen < Piece
     return false unless self.pos.is_diag?(end_pos) || self.pos.vertical_to?(end_pos) || self.pos.horizontal_to?(end_pos)
     return false if own_piece?(@board[end_pos])
     all_moves = self.pos.to(end_pos)
+    #p all_moves
     return false if all_moves.empty?
     return false unless not_blocked?(all_moves)
     return true
