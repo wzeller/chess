@@ -73,7 +73,7 @@ class Board
       switch = !switch
       (0...8).each do |col|
         if switch == true
-          @board_color[row][col] = :light_white
+          @board_color[row][col] = :light_blue
         else
           @board_color[row][col] = :light_black
         end

@@ -53,6 +53,7 @@ class Game
             # p new_dup.object_id.to_s + " OUTSIDE OF MOVE"
 
             if not new_dup.is_board_in_check?(turn, @opponent_turn[turn])
+              print new_dup.stage
               all_legal_moves << move
             end
           end
